@@ -15,22 +15,27 @@ module butterfly (
     output logic signed [15:0] br_out,
     output logic signed [15:0] bi_out
 );
+    logic signed [31:0] wb_real_full;
+    logic signed [31:0] wb_imag_full;
     logic signed [15:0] wb_real;
     logic signed [15:0] wb_imag;
     complex_multi mult_inst(
-        .ar(ar), .ai(ai),
-        .br(br), .bi(bi),
-        .wr(wr), .wi(wi),
-        .wb_real(wb_real),
-        .wb_imag(wb_imag)
+        .a_real(br), .a_imag(bi),
+        .b_real(wr), .b_imag(wi),
+        .p_real(wb_real_full),
+        .p_imag(wb_imag_full)
     );
+
+    assign wb_real = wb_real_full[30:15];
+    assign wb_imag = wb_imag_full[30:15];
+
     always_ff @(posedge clk) begin
         if(rst) begin
             ar_out <= 0;
             ai_out <= 0;
             br_out <= 0;
             bi_out <= 0;
-            valid_out <= 1;
+            valid_out <= 0;
         end else begin
             valid_out <= valid_in;
             ar_out <= ar + wb_real;
