@@ -3,7 +3,7 @@ parameter DEPTH = N/2;
 paremeter ABITS = 9; //address bits
 parameter WIDTH = 16; //
 
-module complex_mult (
+module twiddle_rom (
     input logic clk,
     input logic [ABITS-1:0] addr,
     output logic signed [WIDTH-1:0] wr,
