@@ -1,7 +1,7 @@
 module bram (
-    parameter ABITS = 10; // Address bits
-    parameter WIDTH = 32; // Data width
-    parameter DEPTH = 1024; // Depth of the BRAM
+    parameter ABITS = 10, // Address bits
+    parameter WIDTH = 32, // Data width
+    parameter DEPTH = 1024 // Depth of the BRAM
 )(
     input logic clk,
     input logic [ABITS-1:0] addrA,
