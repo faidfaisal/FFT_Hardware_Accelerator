@@ -12,7 +12,7 @@ This project implements a **hardware-accelerated FFT architecture** on a Xilinx 
 
 ---
 
-## 🎯 Motivation
+## Motivation
 
 Many real-world applications require fast frequency-domain analysis:
 
@@ -35,7 +35,7 @@ Software implementations become computationally expensive for large FFT sizes. F
 
 ---
 
-## 📐 Mathematical Background
+##  Mathematical Background
 
 ### Discrete Fourier Transform (DFT)
 
