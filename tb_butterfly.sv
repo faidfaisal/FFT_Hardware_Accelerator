@@ -2,27 +2,14 @@
 
 module tb_butterfly;
 
-    // Clock and control
     logic clk;
     logic rst;
     logic valid_in;
     logic valid_out;
 
-    // Butterfly inputs
-    logic signed [15:0] ar;
-    logic signed [15:0] ai;
-    logic signed [15:0] br;
-    logic signed [15:0] bi;
-    logic signed [15:0] wr;
-    logic signed [15:0] wi;
+    logic signed [15:0] ar, ai, br, bi, wr, wi;
+    logic signed [15:0] ar_out, ai_out, br_out, bi_out;
 
-    // Butterfly outputs
-    logic signed [15:0] ar_out;
-    logic signed [15:0] ai_out;
-    logic signed [15:0] br_out;
-    logic signed [15:0] bi_out;
-
-    // Instantiate DUT (Device Under Test)
     butterfly dut (
         .clk(clk),
         .rst(rst),
@@ -42,12 +29,53 @@ module tb_butterfly;
         .bi_out(bi_out)
     );
 
-    // Generate clock
     always #5 clk = ~clk;
+
+    // Convert real -> Q1.15
+    function automatic signed [15:0] q15(input real x);
+        q15 = $rtoi(x * 32768.0);
+    endfunction
+
+    // Convert Q1.15 -> real
+    function automatic real q15_to_real(input signed [15:0] x);
+        q15_to_real = x / 32768.0;
+    endfunction
+
+    // Print inputs and outputs
+    task automatic print_results(input string name);
+        begin
+            $display("%s", name);
+
+            $display("INPUTS:");
+            $display("A = %0d + j%0d   (%f + j%f)",
+                     ar, ai,
+                     q15_to_real(ar), q15_to_real(ai));
+
+            $display("B = %0d + j%0d   (%f + j%f)",
+                     br, bi,
+                     q15_to_real(br), q15_to_real(bi));
+
+            $display("W = %0d + j%0d   (%f + j%f)",
+                     wr, wi,
+                     q15_to_real(wr), q15_to_real(wi));
+
+            $display("");
+
+            $display("OUTPUTS:");
+            $display("Y0 = %0d + j%0d   (%f + j%f)",
+                     ar_out, ai_out,
+                     q15_to_real(ar_out), q15_to_real(ai_out));
+
+            $display("Y1 = %0d + j%0d   (%f + j%f)",
+                     br_out, bi_out,
+                     q15_to_real(br_out), q15_to_real(bi_out));
+
+            $display("valid_out = %0d", valid_out);
+        end
+    endtask
 
     initial begin
 
-        // Initialize signals
         clk = 0;
         rst = 1;
         valid_in = 0;
@@ -59,62 +87,53 @@ module tb_butterfly;
         wr = 0;
         wi = 0;
 
-        // Hold reset
         #20;
         rst = 0;
 
-        // A = 5 + j2
-        // B = 3 + j1
-        // W = 1 + j0
+        //--------------------------------------------------
+        // TEST 1
+        //--------------------------------------------------
+        @(negedge clk);
 
-        ar = 5;
-        ai = 2;
+        ar = q15(0.5);
+        ai = q15(0.25);
 
-        br = 3;
-        bi = 1;
+        br = q15(0.25);
+        bi = q15(0.125);
 
-        wr = 32767;  // Q1.15 representation of 1.0
-        wi = 0;
+        wr = 16'sh7FFF;     // ~1.0
+        wi = q15(0.0);
 
         valid_in = 1;
 
-        #20;
+        @(posedge valid_out);
+        #1;
+        print_results("TEST 1");
 
-        $display("TEST 1");
-        $display("A = %0d + j%0d", ar, ai);
-        $display("B = %0d + j%0d", br, bi);
+        //--------------------------------------------------
+        // TEST 2
+        //--------------------------------------------------
+        @(negedge clk);
 
-        $display("Output 1 = %0d + j%0d",
-                 ar_out, ai_out);
+        ar = q15(0.75);
+        ai = q15(0.25);
 
-        $display("Output 2 = %0d + j%0d",
-                 br_out, bi_out);
+        br = q15(0.125);
+        bi = q15(0.0625);
 
-        // A = 10 + j4
-        // B = 2 + j1
-        // W = 1 + j0
+        wr = 16'sh7FFF;
+        wi = q15(0.0);
 
-        ar = 10;
-        ai = 4;
+        valid_in = 1;
 
-        br = 2;
-        bi = 1;
+        @(posedge valid_out);
+        #1;
+        print_results("TEST 2");
 
-        wr = 32767;
-        wi = 0;
+        @(negedge clk);
+        valid_in = 0;
 
-        #20;
-
-        $display("TEST 2");
-
-        $display("Output 1 = %0d + j%0d",
-                 ar_out, ai_out);
-
-        $display("Output 2 = %0d + j%0d",
-                 br_out, bi_out);
-
-        #20;
-
+        #50;
         $finish;
     end
 
