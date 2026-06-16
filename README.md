@@ -215,7 +215,7 @@ This modular approach simplifies debugging and isolates failures to individual c
 
 ---
 
-## 🔭 Long-Term Goal
+##  Long-Term Goal
 
 ```
 ARM Processor (Vitis)
