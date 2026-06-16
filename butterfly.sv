@@ -19,7 +19,7 @@ module butterfly (
     logic signed [31:0] wb_imag_full;
     logic signed [15:0] wb_real;
     logic signed [15:0] wb_imag;
-    complex_multi mult_inst(
+    complex_mult mult_inst(
         .a_real(br), .a_imag(bi),
         .b_real(wr), .b_imag(wi),
         .p_real(wb_real_full),
