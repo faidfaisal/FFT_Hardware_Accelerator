@@ -64,7 +64,7 @@ The FFT reduces this to $O(N \log_2 N)$:
 
 ---
 
-## 🦋 Algorithm: Cooley-Tukey Radix-2
+## Algorithm: Cooley-Tukey Radix-2
 
 This project uses the **Radix-2 Cooley-Tukey** algorithm, which recursively decomposes a larger FFT into smaller ones:
 
