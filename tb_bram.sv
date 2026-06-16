@@ -12,7 +12,7 @@ module tb_bram;
     logic signed [WIDTH-1:0] data_outA, data_outB;
     logic weA, weB;
 
-    bram #(
+    fft_bram #(
         .ABITS(ABITS),
         .WIDTH(WIDTH),
         .DEPTH(DEPTH)
