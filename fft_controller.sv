@@ -40,8 +40,7 @@ module controller #(
         twiddle_addr = j * (N/(span<<1)); // j * 512 >> stage_cnt
         weA = valid_out;
         weB = valid_out;
-        valid_in = (sta
-        te == COMPUTE);
+        valid_in = (state == COMPUTE);
     end
 
     always_ff @(posedge clk)begin
@@ -61,17 +60,17 @@ module controller #(
                     end
                 end
                 COMPUTE: begin
-                    // increment butterfly counter
-                    if (bf_cnt == (N/2) - 1) begin
-                        bf_cnt <= 0;
-                        // last stage done → go to output
-                        if (stage_cnt == LOG2N - 1) begin
-                            state <= OUTPUT;
+                    if (valid_out) begin
+                        if (bf_cnt == (N/2) - 1) begin
+                            bf_cnt <= 0;
+                            if (stage_cnt == LOG2N - 1) begin
+                                state <= OUTPUT;
+                            end else begin
+                                stage_cnt <= stage_cnt + 1;
+                            end
                         end else begin
-                            stage_cnt <= stage_cnt + 1;
+                            bf_cnt <= bf_cnt + 1;
                         end
-                    end else begin
-                        bf_cnt <= bf_cnt + 1;
                     end
                 end
                 OUTPUT: begin
