@@ -96,6 +96,8 @@ module fft_top #(
         .addrA(addrA),
         .addrB(addrB),
 
+        .wAddrA(addrA_d),
+        .wAddrB(addrB_d), 
         .data_inA(data_inA),
         .data_inB(data_inB),
 
