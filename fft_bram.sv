@@ -11,6 +11,9 @@ module fft_bram #(
     input logic signed [WIDTH-1:0] data_inA,
     input logic signed [WIDTH-1:0] data_inB,
 
+    input  logic [ABITS-1:0] wAddrA,
+    input  logic [ABITS-1:0] wAddrB,
+
     output logic signed [WIDTH-1:0] data_outA,
     output logic signed [WIDTH-1:0] data_outB,
 
@@ -21,11 +24,11 @@ module fft_bram #(
 
     always_ff @(posedge clk) begin
         if (weA) begin
-            bram[addrA] <= data_inA;
+            bram[wAddrA] <= data_inA;
         end
         data_outA <= bram[addrA];
         if (weB) begin
-            bram[addrB] <= data_inB;
+            bram[wAddrB] <= data_inB;
         end
         data_outB <= bram[addrB];
     end

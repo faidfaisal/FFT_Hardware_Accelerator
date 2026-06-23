@@ -8,7 +8,6 @@ module tb_fft_top;
     logic rst;
     logic start;
     logic done;
-
     fft_top #(
         .N(N)
     ) dut (
@@ -17,7 +16,6 @@ module tb_fft_top;
         .start(start),
         .done(done)
     );
-
     always #5 clk = ~clk;
 
     function automatic signed [15:0] q15(input real x);
@@ -36,7 +34,6 @@ module tb_fft_top;
     endfunction
 
     integer i;
-
     initial begin
         clk = 0;
         rst = 1;
@@ -57,10 +54,10 @@ module tb_fft_top;
         dut.bram_inst.bram[6] = pack_complex(q15(0.0),  q15(0.0));
         dut.bram_inst.bram[7] = pack_complex(q15(0.0),  q15(0.0));
 
-        @(negedge clk);
+        @(posedge clk);
         start = 1;
-
-        @(negedge clk);
+        @(posedge clk);
+        @(posedge clk);
         start = 0;
 
         wait(done == 1);

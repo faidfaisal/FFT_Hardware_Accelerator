@@ -41,6 +41,14 @@ module fft_top #(
     logic signed [15:0] ai_out;
     logic signed [15:0] br_out;
     logic signed [15:0] bi_out;
+    logic [ABITS-1:0] addrA_d;
+    logic [ABITS-1:0] addrB_d;
+
+
+    always_ff @(posedge clk) begin
+        addrA_d <= addrA;
+        addrB_d <= addrB;
+    end
 
     // BRAM format:
     // [31:16] = real
