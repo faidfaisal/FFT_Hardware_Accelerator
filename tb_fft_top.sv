@@ -8,6 +8,7 @@ module tb_fft_top;
     logic rst;
     logic start;
     logic done;
+
     fft_top #(
         .N(N)
     ) dut (
@@ -16,6 +17,7 @@ module tb_fft_top;
         .start(start),
         .done(done)
     );
+
     always #5 clk = ~clk;
 
     function automatic signed [15:0] q15(input real x);
@@ -34,6 +36,7 @@ module tb_fft_top;
     endfunction
 
     integer i;
+
     initial begin
         clk = 0;
         rst = 1;
@@ -42,9 +45,6 @@ module tb_fft_top;
         #20;
         rst = 0;
 
-        // Simple impulse input:
-        // x = [0.25, 0, 0, 0, 0, 0, 0, 0]
-        // Expected FFT output = 0.25 + j0
         dut.bram_inst.bram[0] = pack_complex(q15(0.25), q15(0.0));
         dut.bram_inst.bram[1] = pack_complex(q15(0.0),  q15(0.0));
         dut.bram_inst.bram[2] = pack_complex(q15(0.0),  q15(0.0));
@@ -56,11 +56,13 @@ module tb_fft_top;
 
         @(posedge clk);
         start = 1;
-        @(posedge clk);
+
         @(posedge clk);
         start = 0;
 
         wait(done == 1);
+
+        #20;
 
         $display("\nFFT DONE\n");
 
@@ -77,8 +79,12 @@ module tb_fft_top;
     end
 
     always @(posedge clk) begin
-        $display("t=%0t start=%0d done=%0d valid_in=%0d valid_out=%0d addrA=%0d addrB=%0d twiddle=%0d weA=%0d weB=%0d",
+        $display(
+            "t=%0t state=%0d stage=%0d bf=%0d start=%0d done=%0d vin=%0d vout=%0d addrA=%0d addrB=%0d tw=%0d weA=%0d weB=%0d",
             $time,
+            dut.controller_inst.state,
+            dut.controller_inst.stage_cnt,
+            dut.controller_inst.bf_cnt,
             start,
             done,
             dut.valid_in,
