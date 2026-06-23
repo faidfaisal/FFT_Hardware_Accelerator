@@ -76,6 +76,7 @@ module controller #(
                 OUTPUT: begin
                     // read results sequentially
                     done <= 1;
+                    stage_cnt <= 0;
                     state <= IDLE;
                 end
 
