@@ -45,14 +45,14 @@ module tb_fft_top;
         #20;
         rst = 0;
 
-    dut.bram_inst.bram[0] = pack_complex(q15(0.0),  q15(0.0));   // x[0]=0
-    dut.bram_inst.bram[4] = pack_complex(q15(0.25), q15(0.0));   // x[1]=0.25 goes to bit-rev addr 4
-    dut.bram_inst.bram[2] = pack_complex(q15(0.0),  q15(0.0));   // x[2]=0
-    dut.bram_inst.bram[6] = pack_complex(q15(0.0),  q15(0.0));   // x[3]=0
-    dut.bram_inst.bram[1] = pack_complex(q15(0.0),  q15(0.0));   // x[4]=0
-    dut.bram_inst.bram[5] = pack_complex(q15(0.0),  q15(0.0));   // x[5]=0
-    dut.bram_inst.bram[3] = pack_complex(q15(0.0),  q15(0.0));   // x[6]=0
-    dut.bram_inst.bram[7] = pack_complex(q15(0.0),  q15(0.0));   // x[7]=0
+    dut.bram_inst.bram[0] = pack_complex(q15( 0.125),  q15(0.0)); // x[0]
+    dut.bram_inst.bram[4] = pack_complex(q15(-0.0625), q15(0.0)); // x[1]
+    dut.bram_inst.bram[2] = pack_complex(q15( 0.25),   q15(0.0)); // x[2]
+    dut.bram_inst.bram[6] = pack_complex(q15( 0.0),    q15(0.0)); // x[3]
+    dut.bram_inst.bram[1] = pack_complex(q15(-0.125),  q15(0.0)); // x[4]
+    dut.bram_inst.bram[5] = pack_complex(q15( 0.1875), q15(0.0)); // x[5]
+    dut.bram_inst.bram[3] = pack_complex(q15(-0.25),   q15(0.0)); // x[6]
+    dut.bram_inst.bram[7] = pack_complex(q15( 0.0625), q15(0.0)); // x[7]
 
         @(posedge clk);
         start = 1;
