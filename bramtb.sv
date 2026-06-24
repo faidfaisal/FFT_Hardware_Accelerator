@@ -12,7 +12,7 @@ module tb_bram;
     logic signed [WIDTH-1:0] data_outA, data_outB;
     logic weA, weB;
 
-    fft_bram #(
+    bram #(
         .ABITS(ABITS),
         .WIDTH(WIDTH),
         .DEPTH(DEPTH)
@@ -65,7 +65,6 @@ module tb_bram;
         $display("Test 3: data_outA = %h (expect 11111111)", data_outA);
         $display("Test 3: data_outB = %h (expect 22222222)", data_outB);
 
-        // ---- Test 4: read different addresses simultaneously ----
         addrA = 10'd10;
         addrB = 10'd20;
         @(posedge clk);

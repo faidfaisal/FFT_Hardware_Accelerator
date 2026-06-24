@@ -24,7 +24,12 @@ module fft_top #(
     logic signed [15:0] ar, ai, br, bi;
     logic signed [15:0] wr, wi;
     logic signed [15:0] ar_out, ai_out, br_out, bi_out;
+    logic [ABITS-1:0] addrA_d, addrB_d;
 
+    always_ff @(posedge clk) begin
+        addrA_d <= addrA;
+        addrB_d <= addrB;
+    end
     assign ar = data_outA[31:16];
     assign ai = data_outA[15:0];
     assign br = data_outB[31:16];
@@ -62,8 +67,8 @@ module fft_top #(
             .addrA(addrA),
             .addrB(addrB),
         
-            .wAddrA(addrA),
-            .wAddrB(addrB),
+            .wAddrA(addrA_d),
+            .wAddrB(addrB_d),
         
             .data_inA(data_inA),
             .data_inB(data_inB),

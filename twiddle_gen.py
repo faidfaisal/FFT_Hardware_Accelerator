@@ -1,6 +1,6 @@
 import numpy as np
 
-N = 1024
+N = 8
 
 real_vals = []
 imag_vals = []
@@ -12,11 +12,11 @@ for k in range(N // 2):
     real_vals.append(wr)
     imag_vals.append(wi)
 
-with open("twiddle_real.hex", "w") as f:
+with open(f'twiddle_real{N}.hex', "w") as f:
     for val in real_vals:
         f.write(f"{val:04X}\n")
 
-with open("twiddle_imag.hex", "w") as f:
+with open(f'twiddle_imag{N}.hex', "w") as f:
     for val in imag_vals:
         f.write(f"{val:04X}\n")
 
