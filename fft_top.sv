@@ -10,7 +10,12 @@ module fft_top #(
     input  logic clk,
     input  logic rst,
     input  logic start,
-    output logic done
+    output logic done,
+
+    input  logic [ABITS-1:0] cpu_addr,
+    input  logic [DATA_WIDTH-1:0] cpu_wdata,
+    input  logic cpu_we,
+    output logic [DATA_WIDTH-1:0] cpu_rdata
 );
 
     logic [ABITS-1:0] addrA, addrB;
@@ -24,12 +29,14 @@ module fft_top #(
     logic signed [15:0] ar, ai, br, bi;
     logic signed [15:0] wr, wi;
     logic signed [15:0] ar_out, ai_out, br_out, bi_out;
+
     logic [ABITS-1:0] addrA_d, addrB_d;
 
     always_ff @(posedge clk) begin
         addrA_d <= addrA;
         addrB_d <= addrB;
     end
+
     assign ar = data_outA[31:16];
     assign ai = data_outA[15:0];
     assign br = data_outB[31:16];
@@ -57,28 +64,33 @@ module fft_top #(
         .done(done)
     );
 
-        fft_bram #(
-            .ABITS(ABITS),
-            .WIDTH(DATA_WIDTH),
-            .DEPTH(N)
-        ) bram_inst (
-            .clk(clk),
-        
-            .addrA(addrA),
-            .addrB(addrB),
-        
-            .wAddrA(addrA_d),
-            .wAddrB(addrB_d),
-        
-            .data_inA(data_inA),
-            .data_inB(data_inB),
-        
-            .data_outA(data_outA),
-            .data_outB(data_outB),
-        
-            .weA(weA),
-            .weB(weB)
-        );
+    fft_bram #(
+        .ABITS(ABITS),
+        .WIDTH(DATA_WIDTH),
+        .DEPTH(N)
+    ) bram_inst (
+        .clk(clk),
+
+        .addrA(addrA),
+        .addrB(addrB),
+
+        .wAddrA(addrA_d),
+        .wAddrB(addrB_d),
+
+        .data_inA(data_inA),
+        .data_inB(data_inB),
+
+        .data_outA(data_outA),
+        .data_outB(data_outB),
+
+        .weA(weA),
+        .weB(weB),
+
+        .cpu_addr(cpu_addr),
+        .cpu_wdata(cpu_wdata),
+        .cpu_we(cpu_we),
+        .cpu_rdata(cpu_rdata)
+    );
 
     twiddle_rom #(
         .N(N),
@@ -96,13 +108,17 @@ module fft_top #(
         .clk(clk),
         .valid_in(valid_in),
         .rst(rst),
+
         .ar(ar),
         .ai(ai),
         .br(br),
         .bi(bi),
+
         .wr(wr),
         .wi(wi),
+
         .valid_out(valid_out),
+
         .ar_out(ar_out),
         .ai_out(ai_out),
         .br_out(br_out),
