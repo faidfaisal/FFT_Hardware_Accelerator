@@ -20,12 +20,7 @@ module fft_bram #(
     output logic signed [WIDTH-1:0] data_outB,
 
     input  logic weA,
-    input  logic weB,
-
-    input  logic [ABITS-1:0] cpu_addr,
-    input  logic [WIDTH-1:0] cpu_wdata,
-    input  logic cpu_we,
-    output logic [WIDTH-1:0] cpu_rdata
+    input  logic weB
 );
 
     logic signed [WIDTH-1:0] bram [0:DEPTH-1];
@@ -37,13 +32,8 @@ module fft_bram #(
         if (weB)
             bram[wAddrB] <= data_inB;
 
-        if (cpu_we)
-            bram[cpu_addr] <= cpu_wdata;
-
         data_outA <= bram[addrA];
         data_outB <= bram[addrB];
-
-        cpu_rdata <= bram[cpu_addr];
     end
 
 endmodule
