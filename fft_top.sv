@@ -10,35 +10,67 @@ module fft_top #(
     input  logic clk,
     input  logic rst,
     input  logic start,
-    output logic done,
-
-    input  logic [ABITS-1:0] cpu_addr,
-    input  logic [DATA_WIDTH-1:0] cpu_wdata,
-    input  logic cpu_we,
-    output logic [DATA_WIDTH-1:0] cpu_rdata
+    output logic done
 );
 
-    logic [ABITS-1:0] addrA, addrB;
+    // Controller signals
+    logic [ABITS-1:0] addrA;
+    logic [ABITS-1:0] addrB;
     logic [TWIDDLE_BITS-1:0] twiddle_addr;
-    logic valid_in, valid_out;
-    logic weA, weB;
 
-    logic signed [DATA_WIDTH-1:0] data_inA, data_inB;
-    logic signed [DATA_WIDTH-1:0] data_outA, data_outB;
+    logic valid_in;
+    logic valid_out;
+    logic weA;
+    logic weB;
 
-    logic signed [15:0] ar, ai, br, bi;
-    logic signed [15:0] wr, wi;
-    logic signed [15:0] ar_out, ai_out, br_out, bi_out;
+    // BRAM data
+    logic signed [DATA_WIDTH-1:0] data_inA;
+    logic signed [DATA_WIDTH-1:0] data_inB;
+    logic signed [DATA_WIDTH-1:0] data_outA;
+    logic signed [DATA_WIDTH-1:0] data_outB;
 
-    logic [ABITS-1:0] addrA_d, addrB_d;
+    // Butterfly inputs
+    logic signed [15:0] ar;
+    logic signed [15:0] ai;
+    logic signed [15:0] br;
+    logic signed [15:0] bi;
 
+    // Twiddle values
+    logic signed [15:0] wr;
+    logic signed [15:0] wi;
+
+    // Butterfly outputs
+    logic signed [15:0] ar_out;
+    logic signed [15:0] ai_out;
+    logic signed [15:0] br_out;
+    logic signed [15:0] bi_out;
+
+    // Delayed write addresses
+    logic [ABITS-1:0] addrA_d;
+    logic [ABITS-1:0] addrB_d;
+
+    /*
+     * Delay the read addresses so the butterfly result is written
+     * back to the same pair of locations that generated the inputs.
+     */
     always_ff @(posedge clk) begin
-        addrA_d <= addrA;
-        addrB_d <= addrB;
+        if (rst) begin
+            addrA_d <= '0;
+            addrB_d <= '0;
+        end else begin
+            addrA_d <= addrA;
+            addrB_d <= addrB;
+        end
     end
 
+    /*
+     * Complex sample format:
+     * [31:16] = real Q1.15
+     * [15:0]  = imaginary Q1.15
+     */
     assign ar = data_outA[31:16];
     assign ai = data_outA[15:0];
+
     assign br = data_outB[31:16];
     assign bi = data_outB[15:0];
 
@@ -54,12 +86,15 @@ module fft_top #(
         .clk(clk),
         .rst(rst),
         .valid_out(valid_out),
+
         .addrA(addrA),
         .addrB(addrB),
         .twiddle_addr(twiddle_addr),
+
         .weA(weA),
         .weB(weB),
         .valid_in(valid_in),
+
         .start(start),
         .done(done)
     );
@@ -84,12 +119,7 @@ module fft_top #(
         .data_outB(data_outB),
 
         .weA(weA),
-        .weB(weB),
-
-        .cpu_addr(cpu_addr),
-        .cpu_wdata(cpu_wdata),
-        .cpu_we(cpu_we),
-        .cpu_rdata(cpu_rdata)
+        .weB(weB)
     );
 
     twiddle_rom #(
@@ -106,8 +136,8 @@ module fft_top #(
 
     butterfly butterfly_inst (
         .clk(clk),
-        .valid_in(valid_in),
         .rst(rst),
+        .valid_in(valid_in),
 
         .ar(ar),
         .ai(ai),
