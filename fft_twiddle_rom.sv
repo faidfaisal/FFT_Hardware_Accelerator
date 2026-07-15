@@ -15,9 +15,16 @@ module twiddle_rom #(
 
     initial begin
         case (N)
-            8: begin
-                $readmemh("twiddle_real8.hex",    rom_real);
-                $readmemh("twiddle_imag8.hex",    rom_imag);
+8:       begin
+            $readmemh(
+                "D:/FFT_Accelerator/FFT_Accelerator/FFT_Accelerator.srcs/sources_1/new/twiddle_real8.hex",
+                rom_real
+            );
+        
+            $readmemh(
+                "D:/FFT_Accelerator/FFT_Accelerator/FFT_Accelerator.srcs/sources_1/new/twiddle_imag8.hex",
+                rom_imag
+            );
             end
             16: begin
                 $readmemh("twiddle_real16.hex",   rom_real);
@@ -43,9 +50,16 @@ module twiddle_rom #(
                 $readmemh("twiddle_real512.hex",  rom_real);
                 $readmemh("twiddle_imag512.hex",  rom_imag);
             end
-            1024: begin
-                $readmemh("twiddle_real1024.hex", rom_real);
-                $readmemh("twiddle_imag1024.hex", rom_imag);
+        1024: begin
+                $readmemh(
+                    "D:/FFT_Accelerator/FFT_Accelerator/FFT_Accelerator.srcs/sources_1/new/twiddle_real1024.hex",
+                    rom_real
+                );
+            
+                $readmemh(
+                    "D:/FFT_Accelerator/FFT_Accelerator/FFT_Accelerator.srcs/sources_1/new/twiddle_imag1024.hex",
+                    rom_imag
+                );
             end
             default: $display("ERROR: unsupported N=%0d", N);
         endcase
