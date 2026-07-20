@@ -196,23 +196,69 @@ The completed design successfully passed all hardware validation tests executed 
 
 Collectively, these results demonstrate that the FFT accelerator operates correctly across both simulation and hardware environments. Agreement with the NumPy reference implementation, combined with successful execution on the MiniZed FPGA, verifies the correctness of the RTL design, AXI interface, memory subsystem, and embedded software driver. The completed project represents a full hardware/software co-design workflow, from algorithm implementation and RTL development through FPGA deployment and end-to-end hardware validation.
 
-# Key Takeaways
-
-Through this project we gained hands-on experience with:
-
-- FPGA RTL design using SystemVerilog
-- Fixed-point digital signal processing
-- Radix-2 Cooley–Tukey FFT implementation
-- Vivado IP packaging
-- AXI4-Lite peripheral development
-- Hardware/software co-design
-- Zynq-7000 SoC development
-- Embedded software development in Vitis
-- RTL simulation and functional verification
-- FPGA synthesis, implementation, and timing analysis
-- End-to-end hardware validation on a physical FPGA
-
 ---
+
+# Repository Structure
+
+The repository is organized into separate directories for the RTL source code, verification environment, supporting scripts, generated coefficient data, and project documentation.
+
+```text
+FFT_Hardware_Accelerator/
+│
+├── src/                     # SystemVerilog RTL source files
+│   ├── butterfly.sv
+│   ├── complex_mult.sv
+│   ├── fft_axi_wrapper.sv
+│   ├── fft_bram.sv
+│   ├── fft_controller.sv
+│   ├── fft_top.sv
+│   └── fft_twiddle_rom.sv
+│
+├── tb/                      # SystemVerilog testbenches
+│   ├── tb_fftcont.sv
+│   ├── tb_bram.sv
+│   ├── tb_butterfly.sv
+│   ├── tb_complex_mult.sv
+│   ├── tb_fft_top.sv
+│   └── tb_twiddle_rom.sv
+│
+├── scripts/                 # Python utility scripts
+│   ├── full_FFT.py
+│   ├── pythonCheck.py
+│   └── twiddle_gen.py
+│
+├── data/                    # Precomputed twiddle factor lookup tables
+│   ├── twiddle_real*.hex
+│   └── twiddle_imag*.hex
+│
+├── images/                  # README figures and screenshots
+│   ├── block_design.png
+│   ├── waveform.png
+│   ├── numpy_random.png
+│   ├── numpy_tone.png
+│   ├── placement.png
+│   ├── fpga_placement.png
+│   ├── utilization.png
+│   └── vitis_output.png
+│
+├── waveforms/               # Simulation waveform captures
+│
+├── LICENSE
+└── README.md
+```
+
+### Directory Overview
+
+| Directory | Description |
+|-----------|-------------|
+| **src/** | SystemVerilog RTL implementation of the FFT accelerator, including the butterfly processor, controller, memory system, twiddle ROM, and AXI interface. |
+| **tb/** | Standalone SystemVerilog testbenches used to functionally verify each RTL module and the complete FFT accelerator. |
+| **scripts/** | Python scripts used for FFT verification, twiddle factor generation, and comparison against the NumPy software reference. |
+| **data/** | Precomputed Q1.15 twiddle-factor lookup tables used by the hardware Twiddle ROM. |
+| **images/** | Figures, screenshots, and plots included throughout this README. |
+| **waveforms/** | Simulation waveform captures generated during RTL verification. |
+
+The modular organization separates the RTL implementation, verification environment, supporting utilities, and documentation, making the project easier to navigate, maintain, and extend.
 
 ---
 
