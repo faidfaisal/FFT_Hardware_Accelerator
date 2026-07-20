@@ -31,19 +31,6 @@ This repository demonstrates the complete FPGA accelerator development workflow,
 -  End-to-End FPGA Hardware Validation on MiniZed
 
 ---
-
-# Project Highlights
-
-- Designed and implemented a custom FFT accelerator in **SystemVerilog**
-- Packaged the design as a reusable **Vivado IP**
-- Integrated the accelerator with the **Zynq-7000 Processing System**
-- Developed embedded software in **Vitis** to control the hardware
-- Verified functionality through RTL simulation and comparison with **NumPy**
-- Successfully executed the accelerator on the **MiniZed FPGA**
-- Passed memory, impulse, DC, and single-tone hardware validation tests
-
----
-
 # Project Demonstration
 
 The FFT accelerator was successfully synthesized, implemented, and validated on the **Xilinx MiniZed (Zynq-7000)** platform. The complete design was verified through RTL simulation, compared against a NumPy software reference, and executed on physical FPGA hardware using embedded software developed in **Vitis**.
