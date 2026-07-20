@@ -254,3 +254,108 @@ The overall system architecture is illustrated below.
 ```
 
 By moving the FFT computation from software into dedicated FPGA hardware, the processor is relieved of the most computationally intensive portion of the signal-processing pipeline. The resulting architecture offers significantly higher throughput, deterministic execution latency, and improved overall system performance while maintaining a simple software interface through the AXI bus.
+
+---
+
+# RTL Design
+
+The FFT accelerator was developed entirely in **SystemVerilog** using a modular hardware architecture. Each major component of the FFT algorithm was implemented as an independent RTL module, allowing each block to be verified individually before full system integration.
+
+The design follows a hierarchical structure in which a top-level module coordinates the interaction between dedicated processing elements responsible for control, arithmetic operations, memory access, and coefficient lookup.
+
+<p align="center">
+<img src="docs/images/rtl_hierarchy.png" width="700">
+</p>
+
+<p align="center">
+<b>Figure 2.</b> RTL hierarchy of the FFT accelerator.
+</p>
+
+---
+
+## RTL Modules
+
+The accelerator is composed of several reusable hardware modules, each responsible for a specific portion of the FFT computation.
+
+| Module | Description |
+|---------|-------------|
+| **fft_top.sv** | Top-level module that instantiates and connects all FFT submodules. |
+| **fft_controller.sv** | Controls FFT execution, stage sequencing, memory addressing, and control signals. |
+| **butterfly.sv** | Implements the Radix-2 butterfly computation using fixed-point arithmetic. |
+| **complex_mult.sv** | Performs signed Q1.15 complex multiplication with twiddle coefficients. |
+| **twiddle_rom.sv** | Stores precomputed sine and cosine coefficients used during each butterfly stage. |
+| **fft_bram.sv** | Provides on-chip memory for storing input samples, intermediate values, and final FFT outputs. |
+
+---
+
+## FFT Controller
+
+The FFT Controller is responsible for orchestrating the execution of the transform. It sequences each FFT stage, generates memory addresses, controls butterfly scheduling, and monitors the overall computation status.
+
+Its primary responsibilities include:
+
+- Coordinating FFT stage execution
+- Generating BRAM read/write addresses
+- Controlling butterfly operations
+- Managing FFT start and completion signals
+- Synchronizing data movement throughout the accelerator
+
+---
+
+## Butterfly Processing Element
+
+The butterfly processing element is the fundamental computational block of the FFT.
+
+Each butterfly receives two complex inputs and produces two transformed outputs according to the Radix-2 Cooley–Tukey algorithm.
+
+The butterfly performs:
+
+- Complex addition
+- Complex subtraction
+- Twiddle factor multiplication
+- Fixed-point scaling
+
+Since every FFT stage consists of multiple butterfly operations, this module represents the computational core of the accelerator.
+
+---
+
+## Complex Multiplier
+
+The complex multiplier performs signed Q1.15 complex multiplication between incoming data samples and the corresponding twiddle coefficient.
+
+For two complex numbers
+
+```text
+(a + jb)(c + jd)
+```
+
+the hardware computes
+
+```text
+(ac − bd) + j(ad + bc)
+```
+
+This arithmetic is implemented entirely using fixed-point operations to minimize FPGA resource utilization while maintaining sufficient numerical accuracy.
+
+---
+
+## Twiddle ROM
+
+Twiddle coefficients are generated offline using Python and stored as fixed-point lookup tables.
+
+Instead of calculating sine and cosine values during execution, the accelerator simply retrieves the required coefficient from ROM.
+
+This significantly reduces computational overhead and enables deterministic execution timing.
+
+---
+
+## BRAM Memory System
+
+The accelerator uses FPGA Block RAM (BRAM) to store:
+
+- Input samples
+- Intermediate butterfly results
+- Final FFT outputs
+
+Using on-chip BRAM provides low-latency memory access while eliminating the need for external memory transactions during FFT execution.
+
