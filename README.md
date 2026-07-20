@@ -257,105 +257,45 @@ By moving the FFT computation from software into dedicated FPGA hardware, the pr
 
 ---
 
-# RTL Design
+---
 
-The FFT accelerator was developed entirely in **SystemVerilog** using a modular hardware architecture. Each major component of the FFT algorithm was implemented as an independent RTL module, allowing each block to be verified individually before full system integration.
+# System Design
 
-The design follows a hierarchical structure in which a top-level module coordinates the interaction between dedicated processing elements responsible for control, arithmetic operations, memory access, and coefficient lookup.
+The FFT accelerator was designed as a hardware/software co-design targeting the **Xilinx MiniZed (Zynq-7000 SoC)** platform. Rather than computing the Fast Fourier Transform entirely in software, the computationally intensive FFT algorithm is offloaded to dedicated hardware implemented in the FPGA's **Programmable Logic (PL)**. The ARM Cortex-A9 Processing System (PS) is responsible for configuring the accelerator, loading input samples, initiating the FFT computation, and reading the resulting frequency-domain data.
+
+Communication between the Processing System and the custom FFT accelerator is performed through an **AXI4-Lite interface**, allowing the accelerator to be accessed as a memory-mapped peripheral from software developed in **Vitis**.
+
+
+The execution sequence consists of the following steps:
+
+1. The ARM Cortex-A9 processor generates or loads the input signal.
+2. The input samples are written into the accelerator's Block RAM through the AXI interface.
+3. The processor writes to the control register to start the FFT.
+4. The FFT controller sequences each stage of the Radix-2 Cooley–Tukey algorithm.
+5. Twiddle coefficients are read from the Twiddle ROM and used during butterfly computations.
+6. Intermediate results are stored within Block RAM throughout execution.
+7. Upon completion, the controller asserts the **Done** signal.
+8. The processor reads the frequency-domain output from the accelerator for analysis or further processing.
+
+---
+
+# Vivado Block Design
+
+After verifying the RTL implementation, the FFT accelerator was packaged as a custom AXI4-Lite IP and integrated into the Xilinx Zynq-7000 Processing System using the Vivado IP Integrator.
+
+The block design below illustrates the complete hardware system implemented on the MiniZed development board.
 
 <p align="center">
-<img src="docs/images/rtl_hierarchy.png" width="700">
+<img src="docs/images/block_design.png" width="1000">
 </p>
 
 <p align="center">
-<b>Figure 2.</b> RTL hierarchy of the FFT accelerator.
+<b>Figure 2.</b> Vivado Block Design showing the Zynq Processing System connected to the custom FFT accelerator through the AXI interconnect.
 </p>
 
----
+The Processing System provides software control of the accelerator through the AXI4-Lite interface. Input samples are transferred from software into the accelerator's memory, the FFT computation is initiated through the control registers, and the resulting frequency-domain data is read back by the processor once execution has completed.
 
-## RTL Modules
+This hardware/software partitioning enables the ARM processor to manage data movement while the FPGA performs the computationally intensive FFT operations entirely in programmable logic.
 
-The accelerator is composed of several reusable hardware modules, each responsible for a specific portion of the FFT computation.
 
-| Module | Description |
-|---------|-------------|
-| **fft_top.sv** | Top-level module that instantiates and connects all FFT submodules. |
-| **fft_controller.sv** | Controls FFT execution, stage sequencing, memory addressing, and control signals. |
-| **butterfly.sv** | Implements the Radix-2 butterfly computation using fixed-point arithmetic. |
-| **complex_mult.sv** | Performs signed Q1.15 complex multiplication with twiddle coefficients. |
-| **twiddle_rom.sv** | Stores precomputed sine and cosine coefficients used during each butterfly stage. |
-| **fft_bram.sv** | Provides on-chip memory for storing input samples, intermediate values, and final FFT outputs. |
-
----
-
-## FFT Controller
-
-The FFT Controller is responsible for orchestrating the execution of the transform. It sequences each FFT stage, generates memory addresses, controls butterfly scheduling, and monitors the overall computation status.
-
-Its primary responsibilities include:
-
-- Coordinating FFT stage execution
-- Generating BRAM read/write addresses
-- Controlling butterfly operations
-- Managing FFT start and completion signals
-- Synchronizing data movement throughout the accelerator
-
----
-
-## Butterfly Processing Element
-
-The butterfly processing element is the fundamental computational block of the FFT.
-
-Each butterfly receives two complex inputs and produces two transformed outputs according to the Radix-2 Cooley–Tukey algorithm.
-
-The butterfly performs:
-
-- Complex addition
-- Complex subtraction
-- Twiddle factor multiplication
-- Fixed-point scaling
-
-Since every FFT stage consists of multiple butterfly operations, this module represents the computational core of the accelerator.
-
----
-
-## Complex Multiplier
-
-The complex multiplier performs signed Q1.15 complex multiplication between incoming data samples and the corresponding twiddle coefficient.
-
-For two complex numbers
-
-```text
-(a + jb)(c + jd)
-```
-
-the hardware computes
-
-```text
-(ac − bd) + j(ad + bc)
-```
-
-This arithmetic is implemented entirely using fixed-point operations to minimize FPGA resource utilization while maintaining sufficient numerical accuracy.
-
----
-
-## Twiddle ROM
-
-Twiddle coefficients are generated offline using Python and stored as fixed-point lookup tables.
-
-Instead of calculating sine and cosine values during execution, the accelerator simply retrieves the required coefficient from ROM.
-
-This significantly reduces computational overhead and enables deterministic execution timing.
-
----
-
-## BRAM Memory System
-
-The accelerator uses FPGA Block RAM (BRAM) to store:
-
-- Input samples
-- Intermediate butterfly results
-- Final FFT outputs
-
-Using on-chip BRAM provides low-latency memory access while eliminating the need for external memory transactions during FFT execution.
-
+By moving the FFT computation into dedicated hardware, the processor is relieved of the most computationally expensive portion of the signal-processing pipeline. This hardware/software partitioning provides significantly higher throughput, deterministic execution latency, and efficient utilization of FPGA resources while maintaining a simple programming interface through AXI.
