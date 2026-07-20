@@ -214,25 +214,24 @@ Through this project we gained hands-on experience with:
 
 ---
 
+---
+
 # Authors
+
+This project was developed in the **Department of Electrical and Computer Engineering** at **Stony Brook University**.
 
 ## Faid Faisal
 
 **B.S. Computer Engineering**  
-Department of Electrical and Computer Engineering  
 Stony Brook University
 
 ---
+
 ## Paddy Xiang Zheng
 
 **B.S. Computer Engineering**  
 **Incoming M.S. Electrical Engineering Student**  
-Department of Electrical and Computer Engineering  
 Stony Brook University
-
----
-
-This project represents a collaborative hardware/software co-design effort involving FPGA architecture, digital signal processing, RTL development, embedded software, and end-to-end hardware validation on the Xilinx MiniZed platform.
 
 ---
 
