@@ -157,23 +157,35 @@ Because every butterfly can operate independently, FPGA hardware can execute man
 
 ## Twiddle Factors
 
-The twiddle factors are complex roots of unity defined as
+Twiddle factors are complex roots of unity that rotate complex numbers during each butterfly operation of the FFT. They are defined by the equation:
 
-\[
-W_N^k=e^{-j2\pi k/N}
-\]
+```text
+                 -j2πk/N
+W_N^k = e
+```
 
-which can also be written as
+Using Euler's identity, the same expression can be written as:
 
-\[
-W_N^k=\cos\left(\frac{2\pi k}{N}\right)-j\sin\left(\frac{2\pi k}{N}\right)
-\]
+```text
+W_N^k = cos(2πk/N) - j sin(2πk/N)
+```
 
-These coefficients are independent of the input data and therefore are precomputed offline using Python before synthesis.
+where:
 
-The resulting fixed-point coefficients are stored inside FPGA Block RAM and accessed through a dedicated **Twiddle ROM**, eliminating the need to compute trigonometric functions during runtime.
+- **N** is the FFT size.
+- **k** is the twiddle factor index.
+- **j** is the imaginary unit (√−1).
 
----
+Each butterfly stage requires a different set of twiddle factors to correctly rotate the intermediate frequency components before they are combined with the remaining FFT data.
+
+Because these coefficients depend only on the FFT size and not on the input signal, they are generated once before synthesis using a Python script (`twiddle_gen.py`). The coefficients are then converted into **Q1.15 fixed-point format** and stored inside FPGA Block RAM as two lookup tables:
+
+- **twiddle_real.hex** — Real coefficients
+- **twiddle_imag.hex** — Imaginary coefficients
+
+During FFT execution, the hardware simply performs a memory lookup rather than computing sine and cosine values in real time. This approach significantly reduces computational complexity, improves throughput, minimizes FPGA resource utilization, and allows the accelerator to operate at higher clock frequencies.
+
+The lookup memory is implemented in **twiddle_rom.sv**, which interfaces directly with the butterfly processing elements throughout each stage of the FFT computation.
 
 ## Fixed-Point Arithmetic
 
