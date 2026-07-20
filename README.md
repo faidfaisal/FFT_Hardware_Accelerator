@@ -214,8 +214,6 @@ Through this project we gained hands-on experience with:
 
 ---
 
-
-
 # Authors
 
 ## Faid Faisal
@@ -235,3 +233,25 @@ Stony Brook University
 ---
 
 This project represents a collaborative hardware/software co-design effort involving FPGA architecture, digital signal processing, RTL development, embedded software, and end-to-end hardware validation on the Xilinx MiniZed platform.
+
+---
+
+# Future Work
+
+Although the accelerator has been successfully validated on hardware, several enhancements could further improve the design:
+
+- Automatic overflow protection using stage scaling or saturation arithmetic
+- AXI-Stream interface for continuous data streaming
+- DMA-based data transfers between the ARM processor and programmable logic
+- Fully pipelined butterfly architecture for higher throughput
+- Runtime-configurable FFT sizes
+- Performance benchmarking against the AMD/Xilinx FFT IP core
+- Clock frequency optimization and timing improvements
+
+---
+
+# Acknowledgements
+
+The authors would like to express their sincere gratitude to **Professor Peter A. Milder** for his guidance, mentorship, and support throughout the development of this project.
+
+This work was completed as part of the **Department of Electrical and Computer Engineering** at **Stony Brook University**.
