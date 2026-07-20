@@ -286,7 +286,7 @@ After verifying the RTL implementation, the FFT accelerator was packaged as a cu
 The block design below illustrates the complete hardware system implemented on the MiniZed development board.
 
 <p align="center">
-<img src="docs/images/block_design.png" width="1000">
+<img src="images/block_design.png" width="1000">
 </p>
 
 <p align="center">
