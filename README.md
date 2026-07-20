@@ -214,36 +214,24 @@ Through this project we gained hands-on experience with:
 
 ---
 
+
+
 # Authors
 
 ## Faid Faisal
 
 **B.S. Computer Engineering**  
 Department of Electrical and Computer Engineering  
-
-**Contributions**
-- SystemVerilog RTL design
-- FFT hardware architecture
-- Custom AXI4-Lite IP development
-- Vivado block design and FPGA implementation
-- Embedded software development in Vitis
-- Hardware validation and testing
-- Project documentation
+Stony Brook University
 
 ---
-
 ## Paddy Xiang Zheng
 
 **B.S. Computer Engineering**  
-**M.S. Electrical Engineering Student**  
-
-**Contributions**
-- RTL verification and simulation
-- Hardware validation
-- NumPy reference comparison
-- FPGA testing and debugging
-- Verification methodology
+**Incoming M.S. Electrical Engineering Student**  
+Department of Electrical and Computer Engineering  
+Stony Brook University
 
 ---
 
-This project was completed as a collaborative hardware/software co-design effort involving digital signal processing, FPGA architecture, RTL development, AXI integration, embedded software, and end-to-end hardware validation on the Xilinx MiniZed platform.
+This project represents a collaborative hardware/software co-design effort involving FPGA architecture, digital signal processing, RTL development, embedded software, and end-to-end hardware validation on the Xilinx MiniZed platform.
