@@ -130,7 +130,7 @@ The ARM Cortex-A9 processor communicates with the accelerator through the AXI4-L
 </p>
 
 <p align="center">
-<i>Figure 4. Successful end-to-end hardware validation using Vitis.</i>
+<i>Figure 5. Successful end-to-end hardware validation using Vitis.</i>
 </p>
 Following successful synthesis and implementation, the accelerator was validated on physical hardware using software developed in Vitis. The ARM Cortex-A9 processor writes input samples to the accelerator through the AXI interface, initiates FFT execution, and reads the resulting spectrum after completion. The hardware test suite verifies several functional aspects of the accelerator, including memory access, impulse response, DC response, and frequency localization using a sinusoidal test signal. All tests completed successfully, confirming correct end-to-end operation of the hardware/software system.
 
@@ -148,7 +148,7 @@ Following verification, the design was synthesized and implemented using **Vivad
 </p>
 
 <p align="center">
-<i>Figure 5. FPGA device placement after implementation.</i>
+<i>Figure 6. FPGA device placement after implementation.</i>
 </p>
 
 After implementation, Vivado places the synthesized logic onto the programmable fabric of the Zynq-7000 FPGA. The placement view illustrates the physical distribution of the accelerator across the device resources. Because the FFT accelerator occupies only a small portion of the available programmable logic, significant FPGA resources remain available for future enhancements such as larger FFT sizes, additional processing pipelines, DMA engines, or streaming interfaces.
@@ -160,7 +160,7 @@ After implementation, Vivado places the synthesized logic onto the programmable 
 </p>
 
 <p align="center">
-<i>Figure 6. FPGA resource utilization reported by Vivado.</i>
+<i>Figure 7. FPGA resource utilization reported by Vivado.</i>
 </p>
 
 The synthesized FFT accelerator occupies only a modest percentage of the available FPGA resources, demonstrating an efficient hardware implementation.
@@ -261,6 +261,25 @@ FFT_Hardware_Accelerator/
 The modular organization separates the RTL implementation, verification environment, supporting utilities, and documentation, making the project easier to navigate, maintain, and extend.
 
 ---
+# Future Work
+
+Although the accelerator has been successfully validated on hardware, several enhancements could further improve the design:
+
+- Automatic overflow protection using stage scaling or saturation arithmetic
+- AXI-Stream interface for continuous data streaming
+- DMA-based data transfers between the ARM processor and programmable logic
+- Fully pipelined butterfly architecture for higher throughput
+- Runtime-configurable FFT sizes
+- Performance benchmarking against the AMD/Xilinx FFT IP core
+- Clock frequency optimization and timing improvements
+
+---
+
+# Acknowledgements
+
+We would like to express our sincere gratitude to **Professor Peter A. Milder** for his guidance, mentorship, and support throughout the development of this project.
+
+---
 
 # Authors
 
@@ -281,22 +300,5 @@ Stony Brook University
 
 ---
 
-# Future Work
-
-Although the accelerator has been successfully validated on hardware, several enhancements could further improve the design:
-
-- Automatic overflow protection using stage scaling or saturation arithmetic
-- AXI-Stream interface for continuous data streaming
-- DMA-based data transfers between the ARM processor and programmable logic
-- Fully pipelined butterfly architecture for higher throughput
-- Runtime-configurable FFT sizes
-- Performance benchmarking against the AMD/Xilinx FFT IP core
-- Clock frequency optimization and timing improvements
-
----
-
-# Acknowledgements
-
-We would like to express our sincere gratitude to **Professor Peter A. Milder** for his guidance, mentorship, and support throughout the development of this project.
 
 
