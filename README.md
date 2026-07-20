@@ -256,9 +256,6 @@ The overall system architecture is illustrated below.
 By moving the FFT computation from software into dedicated FPGA hardware, the processor is relieved of the most computationally intensive portion of the signal-processing pipeline. The resulting architecture offers significantly higher throughput, deterministic execution latency, and improved overall system performance while maintaining a simple software interface through the AXI bus.
 
 ---
-
----
-
 # System Design
 
 The FFT accelerator was designed as a hardware/software co-design targeting the **Xilinx MiniZed (Zynq-7000 SoC)** platform. Rather than computing the Fast Fourier Transform entirely in software, the computationally intensive FFT algorithm is offloaded to dedicated hardware implemented in the FPGA's **Programmable Logic (PL)**. The ARM Cortex-A9 Processing System (PS) is responsible for configuring the accelerator, loading input samples, initiating the FFT computation, and reading the resulting frequency-domain data.
