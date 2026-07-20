@@ -40,9 +40,6 @@ The following sections highlight the complete implementation and verification fl
 ---
 
 ## Vivado Block Design
-
-The FFT accelerator was packaged as a custom **AXI4-Lite IP** and integrated into the Zynq Processing System using **Vivado IP Integrator**.
-
 <p align="center">
 <img src="images/block_design.png" width="950">
 </p>
@@ -56,8 +53,6 @@ The block design illustrates the integration of the custom FFT accelerator into 
 ---
 
 ## RTL Simulation
-
-Prior to FPGA implementation, the complete RTL design was verified through simulation to ensure correct functionality.
 
 <p align="center">
 <img src="images/waveform.png" width="950">
@@ -282,7 +277,6 @@ Stony Brook University
 ## Paddy Xiang Zheng
 
 **B.S. Computer Engineering**  
-**Incoming M.S. Electrical Engineering Student**  
 Stony Brook University
 
 ---
