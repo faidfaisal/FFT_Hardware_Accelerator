@@ -14,33 +14,49 @@ The project demonstrates a complete hardware/software co-design workflow includi
 
 # Fast Fourier Transform (FFT) Theory
 
-## The Discrete Fourier Transform
+## The Discrete Fourier Transform (DFT)
 
-Most real-world signals are naturally represented in the **time domain**, where the amplitude of a signal varies with time. While this representation is useful, many signal-processing applications require understanding the frequency components contained within the signal.
+Most real-world signals are naturally represented in the **time domain**, where the amplitude of a signal varies over time. While this representation is useful for observing how a signal changes, many signal-processing applications require analyzing the individual frequencies that compose the signal.
 
-The **Discrete Fourier Transform (DFT)** transforms a sequence of time-domain samples into their corresponding frequency-domain coefficients.
+The **Discrete Fourier Transform (DFT)** converts a sequence of time-domain samples into their corresponding **frequency-domain coefficients**, revealing the amplitude and phase of each frequency component present in the original signal.
 
-For an input sequence
+For an input sequence:
 
-\[
-x[0],x[1],...,x[N-1]
-\]
+```text
+x[0], x[1], x[2], ..., x[N−1]
+```
 
-the DFT is defined as
+the DFT is defined by:
 
-\[
-X[k]=\sum_{n=0}^{N-1}x[n]W_N^{kn}
-\]
+```text
+              N−1
+X[k] =  Σ  x[n] · WN^(kn)
+             n=0
+```
 
-where
+where the twiddle factor is
 
-\[
-W_N=e^{-j2\pi/N}
-\]
+```text
+            -j2π/N
+WN = e
+```
 
-is known as the **twiddle factor**, representing a complex sinusoidal basis function.
+or equivalently,
 
-Each output coefficient \(X[k]\) represents the magnitude and phase of a particular frequency component present within the original signal.
+```text
+WN = cos(2π/N) − j sin(2π/N)
+```
+
+where:
+
+- **N** is the FFT size.
+- **n** is the input sample index.
+- **k** is the output frequency bin.
+- **j** is the imaginary unit (√−1).
+
+Each output coefficient **X[k]** represents the magnitude and phase of a particular frequency contained within the original signal.
+
+Unlike the time-domain representation, the frequency-domain representation makes it possible to identify dominant frequencies, harmonics, noise components, and other spectral characteristics that are critical in modern digital signal processing applications.
 
 ---
 
