@@ -211,3 +211,39 @@ Through this project we gained hands-on experience with:
 - RTL simulation and functional verification
 - FPGA synthesis, implementation, and timing analysis
 - End-to-end hardware validation on a physical FPGA
+
+---
+
+# Authors
+
+## Faid Faisal
+
+**B.S. Computer Engineering**  
+Department of Electrical and Computer Engineering  
+
+**Contributions**
+- SystemVerilog RTL design
+- FFT hardware architecture
+- Custom AXI4-Lite IP development
+- Vivado block design and FPGA implementation
+- Embedded software development in Vitis
+- Hardware validation and testing
+- Project documentation
+
+---
+
+## Paddy Xiang Zheng
+
+**B.S. Computer Engineering**  
+**M.S. Electrical Engineering Student**  
+
+**Contributions**
+- RTL verification and simulation
+- Hardware validation
+- NumPy reference comparison
+- FPGA testing and debugging
+- Verification methodology
+
+---
+
+This project was completed as a collaborative hardware/software co-design effort involving digital signal processing, FPGA architecture, RTL development, AXI integration, embedded software, and end-to-end hardware validation on the Xilinx MiniZed platform.
