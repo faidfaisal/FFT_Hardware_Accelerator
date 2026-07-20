@@ -1,354 +1,228 @@
-# FFT Hardware Accelerator
+# Introduction
 
-> A fixed-point Radix-2 Cooley-Tukey Fast Fourier Transform (FFT) accelerator implemented in **SystemVerilog** and targeted for **Xilinx FPGAs** using **Vivado** and **Vitis**.
+The **Fast Fourier Transform (FFT)** is one of the most important algorithms in digital signal processing (DSP). It efficiently converts a discrete signal from the **time domain** into its **frequency-domain representation**, allowing engineers to analyze the spectral content of signals that would otherwise be difficult to observe directly.
 
----
+FFT algorithms are fundamental to numerous modern engineering applications including wireless communications, radar systems, software-defined radio (SDR), medical imaging, audio processing, image compression, scientific computing, and real-time signal analysis. Because these applications often require thousands or millions of FFT computations per second, software implementations running on general-purpose processors can become a significant computational bottleneck.
 
-## Overview
+Field Programmable Gate Arrays (FPGAs) provide an attractive platform for accelerating FFT computation by exploiting massive parallelism, dedicated arithmetic hardware, and deterministic execution. Unlike software implementations that execute instructions sequentially, FPGA hardware performs multiple arithmetic operations simultaneously, significantly reducing execution latency while increasing throughput.
 
-The **Fast Fourier Transform (FFT)** is one of the most widely used algorithms in digital signal processing, enabling efficient conversion of signals from the **time domain** into the **frequency domain**.
+This project implements a **1024-point fixed-point Radix-2 Cooley–Tukey FFT accelerator** entirely in **SystemVerilog** and integrates it as a custom **AXI4-Lite peripheral** within a Xilinx Zynq-7000 (MiniZed) system. The accelerator communicates with the ARM Cortex-A9 Processing System through an AXI interface, allowing software developed in **Vitis** to load input samples, initiate FFT execution, and retrieve the resulting frequency-domain data from programmable logic.
 
-This project implements a hardware-accelerated FFT architecture using a **fixed-point Radix-2 Cooley-Tukey algorithm**, providing a scalable foundation for high-performance FPGA-based signal processing systems.
-
-The design emphasizes:
-
-- High-throughput computation
-- Low-latency signal processing
-- Efficient FPGA resource utilization
-- Modular and scalable architecture
-- Fixed-point arithmetic optimization
+The project demonstrates a complete hardware/software co-design workflow including RTL development, functional verification, custom IP packaging, AXI integration, FPGA implementation, embedded software development, and end-to-end hardware validation.
 
 ---
 
-## Key Features
+# Fast Fourier Transform (FFT) Theory
 
-- Radix-2 Cooley-Tukey FFT architecture
-- Q1.15 fixed-point arithmetic
-- Hardware butterfly processing elements
-- Signed complex multiplication unit
-- Twiddle factor ROM with precomputed coefficients
-- BRAM-based data storage architecture
-- Modular SystemVerilog implementation
-- Independent verification testbenches
-- Compatible with Xilinx FPGA development flows
+## The Discrete Fourier Transform
 
----
+Most real-world signals are naturally represented in the **time domain**, where the amplitude of a signal varies with time. While this representation is useful, many signal-processing applications require understanding the frequency components contained within the signal.
 
-## Motivation
+The **Discrete Fourier Transform (DFT)** transforms a sequence of time-domain samples into their corresponding frequency-domain coefficients.
 
-Fast frequency-domain analysis is critical across numerous engineering applications.
+For an input sequence
 
-| Application | Industry |
-|---|---|
-| Radar Systems | Defense & Aerospace |
-| Wireless Communications | Telecommunications |
-| OFDM Modems | Networking |
-| Software Defined Radio (SDR) | RF Engineering |
-| Medical Imaging | Healthcare |
-| Audio Processing | Consumer Electronics |
-| Scientific Instrumentation | Research Computing |
+\[
+x[0],x[1],...,x[N-1]
+\]
 
-While software implementations are flexible, FFT workloads become computationally expensive as transform sizes increase. FPGA acceleration enables performance improvements through parallelism and dedicated hardware resources.
+the DFT is defined as
 
-Benefits of hardware acceleration include:
+\[
+X[k]=\sum_{n=0}^{N-1}x[n]W_N^{kn}
+\]
 
-- Parallel execution
-- Deterministic timing
-- Reduced latency
-- Improved energy efficiency
-- Higher sustained throughput
+where
+
+\[
+W_N=e^{-j2\pi/N}
+\]
+
+is known as the **twiddle factor**, representing a complex sinusoidal basis function.
+
+Each output coefficient \(X[k]\) represents the magnitude and phase of a particular frequency component present within the original signal.
 
 ---
 
-## Mathematical Background
+## Computational Complexity
 
-### Discrete Fourier Transform
+Although the DFT is mathematically straightforward, its computational cost grows rapidly with transform size.
 
-For an N-point sequence:
+A direct implementation requires
 
-```text
-x[0], x[1], ..., x[N-1]
-```
-
-the Discrete Fourier Transform is defined as:
-
-```text
-X[k] = sum from n=0 to N-1 of x[n] * W_N^(kn)
-
-where:
-
-W_N = e^(-j2*pi/N)
-```
-
-is the fundamental twiddle factor.
-
-### Computational Complexity
-
-A direct DFT requires:
-
-```text
+\[
 O(N^2)
-```
+\]
 
-operations.
+complex multiplications and additions.
 
-| FFT Size | DFT Operations |
-|---|---|
+For a 1024-point transform this corresponds to over one million arithmetic operations.
+
+| FFT Size | Direct DFT Operations |
+|----------:|---------------------:|
 | 8 | 64 |
 | 64 | 4,096 |
+| 256 | 65,536 |
 | 1024 | 1,048,576 |
 
-The FFT reduces complexity to:
+Such computational complexity becomes impractical for real-time systems.
 
-```text
-O(N log2 N)
-```
+---
 
-| Algorithm | Operations for N = 1024 |
-|---|---|
-| DFT | 1,048,576 |
+## The Fast Fourier Transform
+
+The **Fast Fourier Transform (FFT)** is an optimized algorithm for computing the DFT.
+
+Instead of directly evaluating every output independently, the FFT recursively decomposes a large transform into a sequence of smaller transforms while exploiting mathematical symmetries within the Fourier matrix.
+
+This reduces computational complexity from
+
+\[
+O(N^2)
+\]
+
+to
+
+\[
+O(N\log_2N)
+\]
+
+For a 1024-point transform, the required arithmetic operations decrease dramatically:
+
+| Algorithm | Approximate Operations |
+|-----------|----------------------:|
+| Direct DFT | 1,048,576 |
 | FFT | 10,240 |
 
-This reduction makes FFTs essential for modern signal processing systems.
+This reduction is the primary reason FFTs are used in virtually every modern digital signal processing application.
 
-### Algorithm: Radix-2 Cooley-Tukey FFT
+---
 
-The FFT recursively decomposes a larger transform into smaller transforms.
+## Radix-2 Cooley–Tukey Algorithm
 
-```text
-8-Point FFT
-     |
-     v
-Two 4-Point FFTs
-     |
-     v
-Four 2-Point FFTs
-```
+The FFT architecture implemented in this project is based on the **Radix-2 Decimation-in-Time (DIT) Cooley–Tukey algorithm**, one of the most widely used FFT algorithms due to its simplicity and efficient hardware implementation.
 
-Each stage consists of butterfly operations connected through twiddle factor multiplication.
+Rather than solving one large transform directly, the algorithm recursively divides the input into progressively smaller transforms until only simple two-point operations remain.
 
-### Butterfly Operation
-
-The radix-2 butterfly is the fundamental computational block.
+For example,
 
 ```text
-Y0 = A + B * W
-Y1 = A - B * W
+1024-point FFT
 
-where:
+↓
 
-A and B are complex inputs
-W is the corresponding twiddle factor
+512-point FFTs
+
+↓
+
+256-point FFTs
+
+↓
+
+...
+
+↓
+
+2-point FFTs
 ```
 
-### Complex Multiplication
+These smaller transforms are connected through a network of **butterfly operations**, which form the fundamental computational building block of the FFT.
 
-For:
+---
+
+## Butterfly Operation
+
+Each butterfly accepts two complex input values and produces two transformed outputs using one complex multiplication and two additions/subtractions.
+
+Mathematically,
+
+\[
+Y_0=A+BW
+\]
+
+\[
+Y_1=A-BW
+\]
+
+where
+
+- \(A\) and \(B\) are complex inputs
+- \(W\) is the corresponding twiddle factor
+
+The butterfly operation is repeated throughout every FFT stage until the complete frequency-domain spectrum has been computed.
+
+Because every butterfly can operate independently, FPGA hardware can execute many butterflies simultaneously, making the architecture highly parallel and significantly faster than sequential software execution.
+
+---
+
+## Twiddle Factors
+
+The twiddle factors are complex roots of unity defined as
+
+\[
+W_N^k=e^{-j2\pi k/N}
+\]
+
+which can also be written as
+
+\[
+W_N^k=\cos\left(\frac{2\pi k}{N}\right)-j\sin\left(\frac{2\pi k}{N}\right)
+\]
+
+These coefficients are independent of the input data and therefore are precomputed offline using Python before synthesis.
+
+The resulting fixed-point coefficients are stored inside FPGA Block RAM and accessed through a dedicated **Twiddle ROM**, eliminating the need to compute trigonometric functions during runtime.
+
+---
+
+## Fixed-Point Arithmetic
+
+Floating-point arithmetic provides excellent numerical precision but requires significantly more FPGA resources and generally operates at lower clock frequencies.
+
+To improve hardware efficiency, this project uses **Q1.15 fixed-point arithmetic**, where each value is represented as a signed 16-bit integer consisting of
+
+- 1 sign bit
+- 15 fractional bits
+
+This representation provides an excellent balance between numerical accuracy, hardware cost, and computational performance while allowing arithmetic operations to map efficiently onto FPGA DSP slices.
+
+---
+
+# FFT Hardware Acceleration
+
+Rather than executing the FFT entirely in software on the ARM Cortex-A9 processor, the computationally intensive FFT algorithm is implemented directly in programmable logic as a dedicated hardware accelerator.
+
+The accelerator consists of several specialized hardware modules including:
+
+- FFT Controller
+- Butterfly Processing Element
+- Complex Multiplier
+- Twiddle Factor ROM
+- BRAM-based Memory System
+
+Software running on the ARM processor communicates with the accelerator through a custom **AXI4-Lite interface**. Input samples are written into the accelerator's memory, the FFT computation is initiated through a control register, and the processed frequency-domain results are read back after computation completes.
+
+The overall system architecture is illustrated below.
 
 ```text
-(a + jb)(c + jd)
+                 ARM Cortex-A9
+                (Vitis Software)
+                       │
+                AXI4-Lite Interface
+                       │
+      ┌────────────────┴────────────────┐
+      │      FFT Hardware Accelerator    │
+      │                                 │
+      │  FFT Controller                  │
+      │       │                          │
+      │  Butterfly Network               │
+      │       │                          │
+      │ Complex Multiplier               │
+      │       │                          │
+      │  Twiddle ROM                     │
+      │       │                          │
+      │     BRAM                         │
+      └─────────────────────────────────┘
 ```
 
-the result is:
-
-```text
-(ac - bd) + j(ad + bc)
-```
-
-This operation is implemented in:
-
-```text
-complex_mult.sv
-```
-
-### Twiddle Factors
-
-Twiddle coefficients are defined as:
-
-```text
-W_N^k = e^(-j2*pi*k/N)
-```
-
-or equivalently:
-
-```text
-W_N^k = cos(2*pi*k/N) - j*sin(2*pi*k/N)
-```
-
-Example values for an 8-point FFT:
-
-| k | Twiddle Factor |
-|---|---|
-| 0 | 1.000 + j0.000 |
-| 1 | 0.707 - j0.707 |
-| 2 | 0.000 - j1.000 |
-| 3 | -0.707 - j0.707 |
-
-### Fixed-Point Representation
-
-The accelerator uses Q1.15 fixed-point arithmetic.
-
-```text
-16-bit signed representation
-1 sign bit
-15 fractional bits
-```
-
-| Decimal Value | Q1.15 Representation |
-|---|---|
-| 1.0 | 32767 |
-| 0.5 | 16384 |
-| 0.707 | 23170 |
-| -1.0 | -32768 |
-
-Fixed-point arithmetic was selected to:
-
-```text
-Reduce hardware resource utilization
-Increase operating frequency
-Improve DSP block efficiency
-Lower power consumption
-Simplify FPGA implementation
-```
-
-### Hardware Architecture
-
-```text
-                    Twiddle ROM
-                          |
-                          v
-Input B -----> Complex Multiplier
-                          |
-                          v
-                        B * W
-                          |
-Input A ------------------+-------------+
-                          |             |
-                          v             v
-                     A + B * W     A - B * W
-                          |
-                          v
-                      Butterfly
-```
-
-The architecture consists of:
-
-```text
-Twiddle ROM
-Complex Multiplier
-Butterfly Processing Element
-BRAM Storage
-FFT Control Logic
-```
-
-Together, these modules implement the FFT computation pipeline.
-
-### Repository Structure
-
-```text
-FFT_Hardware_Accelerator/
-|
-├── butterfly.sv
-├── complex_mult.sv
-|
-├── fft_bram.sv
-├── fft_controller.sv
-|
-├── twiddle_rom.sv
-├── twiddle_real.hex
-├── twiddle_imag.hex
-├── twiddle_gen.py
-|
-├── tb_complex_mult.sv
-├── tb_butterfly.sv
-├── tb_bram.sv
-|
-└── README.md
-```
-
-### Module Descriptions
-
-| Module | Description |
-|---|---|
-| complex_mult.sv | Signed fixed-point complex multiplier |
-| butterfly.sv | Radix-2 butterfly processing element |
-| twiddle_gen.py | Generates fixed-point twiddle coefficient tables |
-| twiddle_rom.sv | Twiddle factor lookup memory |
-| fft_bram.sv | Input, intermediate, and output data storage |
-| fft_controller.sv | FFT sequencing, addressing, and control logic |
-
-### Verification Strategy
-
-Each hardware module is verified independently through dedicated SystemVerilog testbenches.
-
-```text
-complex_mult.sv  -> tb_complex_mult.sv
-butterfly.sv     -> tb_butterfly.sv
-fft_bram.sv      -> tb_bram.sv
-```
-
-This modular verification methodology:
-
-```text
-Simplifies debugging
-Improves test coverage
-Isolates failures quickly
-Supports scalable system integration
-```
-
-### Development Environment
-
-| Tool | Purpose |
-|---|---|
-| SystemVerilog | RTL design |
-| Vivado | Synthesis and implementation |
-| Vitis | FPGA development flow |
-| Python | Twiddle coefficient generation |
-| Xilinx FPGA | Target hardware platform |
-
-### Results
-
-The current implementation demonstrates the core computational building blocks required for a scalable FFT accelerator, including:
-
-```text
-Fixed-point complex multiplication
-Radix-2 butterfly processing
-Twiddle factor generation and storage
-BRAM-based memory architecture
-FFT control and sequencing infrastructure
-```
-
-Future releases will include synthesis reports, timing analysis, FPGA resource utilization, and hardware benchmarking results.
-
-### Future Work
-
-Planned enhancements include:
-
-```text
-Full N-point FFT datapath integration
-Streaming AXI-Stream interfaces
-Pipelined butterfly architecture
-Runtime-configurable FFT sizes
-DMA-based host communication
-FPGA resource and timing optimization
-Hardware/software co-design acceleration
-Comparison against Xilinx FFT IP cores
-```
-
-### Acknowledgements
-
-The authors would like to express their sincere gratitude to Professor Peter A. Milder for his guidance, mentorship, and support throughout the development of this project. His expertise in digital systems design, FPGA architectures, and hardware acceleration greatly influenced the direction and quality of this work.
-
-### Authors
-
-Faid Faisal
-Department of Electrical and Computer Engineering
-Stony Brook University
-
-Paddy Zheng
-Department of Electrical and Computer Engineering
-Stony Brook University
-
-### License
-
-This project is intended for educational and research purposes. Please contact the authors regarding commercial use or redistribution.
+By moving the FFT computation from software into dedicated FPGA hardware, the processor is relieved of the most computationally intensive portion of the signal-processing pipeline. The resulting architecture offers significantly higher throughput, deterministic execution latency, and improved overall system performance while maintaining a simple software interface through the AXI bus.
