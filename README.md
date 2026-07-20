@@ -252,6 +252,6 @@ Although the accelerator has been successfully validated on hardware, several en
 
 # Acknowledgements
 
-The authors would like to express their sincere gratitude to **Professor Peter A. Milder** for his guidance, mentorship, and support throughout the development of this project.
+We would like to express our sincere gratitude to **Professor Peter A. Milder** for his guidance, mentorship, and support throughout the development of this project.
 
-This work was completed as part of the **Department of Electrical and Computer Engineering** at **Stony Brook University**.
+
