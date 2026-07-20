@@ -1,14 +1,14 @@
-# Introduction
+## Introduction
 
-The **Fast Fourier Transform (FFT)** is one of the most important algorithms in digital signal processing (DSP). It efficiently converts a discrete signal from the **time domain** into its **frequency-domain representation**, allowing engineers to analyze the spectral content of signals that would otherwise be difficult to observe directly.
+The Fast Fourier Transform (FFT) is one of the workhorse algorithms of digital signal processing. It takes a signal described in the time domain and converts it into the frequency domain, revealing the underlying frequency content that isn't obvious when just looking at a waveform over time.
 
-FFT algorithms are fundamental to numerous modern engineering applications including wireless communications, radar systems, software-defined radio (SDR), medical imaging, audio processing, image compression, scientific computing, and real-time signal analysis. Because these applications often require thousands or millions of FFT computations per second, software implementations running on general-purpose processors can become a significant computational bottleneck.
+This matters because so much of modern engineering depends on understanding what frequencies make up a signal. Wireless communications, radar, software-defined radio, medical imaging, audio processing, image compression, and scientific computing all lean on the FFT in one form or another. The catch is that many of these applications need to run thousands or even millions of FFTs per second, and once you're at that scale, a software implementation on a general-purpose CPU starts to become the bottleneck.
 
-Field Programmable Gate Arrays (FPGAs) provide an attractive platform for accelerating FFT computation by exploiting massive parallelism, dedicated arithmetic hardware, and deterministic execution. Unlike software implementations that execute instructions sequentially, FPGA hardware performs multiple arithmetic operations simultaneously, significantly reducing execution latency while increasing throughput.
+That's where FPGAs come in. Instead of executing instructions one after another like a processor does, an FPGA can be structured so that many arithmetic operations happen at the same time, in parallel, with predictable timing. That combination of parallelism and determinism makes FPGAs a natural fit for accelerating FFT computation.
 
-This project implements a **1024-point fixed-point Radix-2 Cooley–Tukey FFT accelerator** entirely in **SystemVerilog** and integrates it as a custom **AXI4-Lite peripheral** within a Xilinx Zynq-7000 (MiniZed) system. The accelerator communicates with the ARM Cortex-A9 Processing System through an AXI interface, allowing software developed in **Vitis** to load input samples, initiate FFT execution, and retrieve the resulting frequency-domain data from programmable logic.
+This project takes advantage of that by implementing a 1024-point, fixed-point, Radix-2 Cooley–Tukey FFT accelerator written entirely in SystemVerilog. It's packaged as a custom AXI4-Lite peripheral and integrated into a Xilinx Zynq-7000 system on a MiniZed board, where it talks to the ARM Cortex-A9 processing system over the AXI bus. On the software side, Vitis is used to load input samples into the accelerator, kick off the FFT computation, and read back the resulting frequency-domain data once it's done.
 
-The project demonstrates a complete hardware/software co-design workflow including RTL development, functional verification, custom IP packaging, AXI integration, FPGA implementation, embedded software development, and end-to-end hardware validation.
+Altogether, the project walks through a full hardware/software co-design flow: writing and verifying the RTL, packaging it as a custom IP block, integrating it over AXI, implementing the design on the FPGA, writing the embedded software to drive it, and validating the whole thing end-to-end on real hardware.
 
 ---
 
