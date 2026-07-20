@@ -64,6 +64,8 @@ The FFT accelerator was packaged as a custom **AXI4-Lite IP** and integrated int
 <i>Figure 1. Vivado block design integrating the custom FFT accelerator with the ARM Cortex-A9 Processing System.</i>
 </p>
 
+The block design illustrates the integration of the custom FFT accelerator into the Zynq-7000 processing system using the AXI4-Lite protocol. The ARM Cortex-A9 processor communicates with the accelerator through the AXI interconnect, allowing software developed in Vitis to configure the hardware, transfer input samples, initiate FFT execution, and retrieve the resulting frequency-domain data. A Processor System Reset module is used to synchronize reset signals across the programmable logic, while the AXI interconnect routes transactions between the processing system and the custom FFT IP. This architecture enables seamless hardware/software co-design while exposing the accelerator as a standard memory-mapped peripheral.
+
 ---
 
 ## RTL Simulation
@@ -77,6 +79,7 @@ Prior to FPGA implementation, the complete RTL design was verified through simul
 <p align="center">
 <i>Figure 2. RTL simulation waveform demonstrating successful FFT execution.</i>
 </p>
+The RTL simulation verifies the functional behavior of the FFT accelerator prior to FPGA implementation. The waveform captures the interaction between the control logic and memory interface as the accelerator progresses through an FFT computation. The simulation confirms correct sequencing of the control signals (`start`, `busy`, and `done`) as well as proper communication over the CPU interface. It also verifies that data is correctly transferred between the processing logic and on-chip memory throughout execution.
 
 ---
 
@@ -98,7 +101,7 @@ The first verification uses a randomly generated input signal. The upper plot co
 <i>Figure 3. Comparison of the RTL FFT output against the NumPy reference for a random input signal. The lower plot shows the absolute fixed-point error across all 1024 frequency bins.</i>
 </p>
 
-The two spectra closely overlap, demonstrating that the hardware implementation accurately reproduces the expected frequency-domain response. The remaining error is primarily due to fixed-point quantization and arithmetic rounding rather than algorithmic inaccuracies.
+The two spectra closely overlap, demonstrating that the hardware implementation accurately reproduces the expected frequency-domain response. The remaining error is primarily due to fixed-point quantization and arithmetic rounding rather than algorithmic inaccuracies. A randomly generated input vector was used to evaluate the overall numerical accuracy of the hardware implementation. The upper plot compares the FFT magnitude produced by the RTL simulation against NumPy's floating-point reference implementation. The two curves closely overlap across all 1024 frequency bins, demonstrating that the hardware implementation accurately reproduces the expected spectral response. The lower plot illustrates the absolute fixed-point error measured in Q1.15 least significant bits (LSBs). As expected, the observed error is small and primarily results from finite-precision arithmetic rather than algorithmic inaccuracies.
 
 ---
 
@@ -114,9 +117,7 @@ A second verification was performed using a two-tone input signal consisting of 
 <i>Figure 4. Comparison between the FFT accelerator and the NumPy reference for a two-tone input signal.</i>
 </p>
 
-The RTL simulation produces spectral peaks at the exact same frequency bins as the NumPy reference, confirming that the butterfly operations, twiddle factor lookups, addressing logic, and FFT sequencing are functioning correctly. The lower logarithmic plot highlights the small numerical differences introduced by fixed-point arithmetic while demonstrating excellent agreement between the hardware and software implementations.
-
-Overall, these verification results provide strong evidence that the custom FFT accelerator performs the expected 1024-point Radix-2 Cooley–Tukey transform with high numerical accuracy while operating entirely in FPGA hardware.
+The RTL simulation produces spectral peaks at the exact same frequency bins as the NumPy reference, confirming that the butterfly operations, twiddle factor lookups, addressing logic, and FFT sequencing are functioning correctly. The lower logarithmic plot highlights the small numerical differences introduced by fixed-point arithmetic while demonstrating excellent agreement between the hardware and software implementations. To verify frequency localization, a two-tone sinusoidal input was applied to both the RTL implementation and the NumPy reference model. The accelerator correctly identifies both frequency components, producing spectral peaks at the same frequency bins as the floating-point implementation. The logarithmic error plot demonstrates that differences between the hardware and software implementations remain extremely small across the spectrum, validating the correctness of the butterfly computations, twiddle factor lookups, and fixed-point arithmetic.
 
 ---
 
@@ -131,6 +132,8 @@ The ARM Cortex-A9 processor communicates with the accelerator through the AXI4-L
 <p align="center">
 <i>Figure 4. Successful end-to-end hardware validation using Vitis.</i>
 </p>
+Following successful synthesis and implementation, the accelerator was validated on physical hardware using software developed in Vitis. The ARM Cortex-A9 processor writes input samples to the accelerator through the AXI interface, initiates FFT execution, and reads the resulting spectrum after completion. The hardware test suite verifies several functional aspects of the accelerator, including memory access, impulse response, DC response, and frequency localization using a sinusoidal test signal. All tests completed successfully, confirming correct end-to-end operation of the hardware/software system.
+
 
 ---
 
@@ -148,6 +151,8 @@ Following verification, the design was synthesized and implemented using **Vivad
 <i>Figure 5. FPGA device placement after implementation.</i>
 </p>
 
+After implementation, Vivado places the synthesized logic onto the programmable fabric of the Zynq-7000 FPGA. The placement view illustrates the physical distribution of the accelerator across the device resources. Because the FFT accelerator occupies only a small portion of the available programmable logic, significant FPGA resources remain available for future enhancements such as larger FFT sizes, additional processing pipelines, DMA engines, or streaming interfaces.
+
 ### Resource Utilization
 
 <p align="center">
@@ -157,6 +162,17 @@ Following verification, the design was synthesized and implemented using **Vivad
 <p align="center">
 <i>Figure 6. FPGA resource utilization reported by Vivado.</i>
 </p>
+
+The synthesized FFT accelerator occupies only a modest percentage of the available FPGA resources, demonstrating an efficient hardware implementation.
+
+The design utilizes approximately:
+
+- **10%** of available Slice LUTs
+- **3%** of Slice Registers
+- **6%** of Block RAM resources
+- **8%** of available DSP slices
+
+The relatively low resource utilization provides substantial headroom for future architectural improvements while maintaining efficient implementation on the MiniZed platform.
 
 ---
 
@@ -178,10 +194,20 @@ The completed design successfully passed all hardware validation tests executed 
 === ALL TESTS PASSED ===
 ```
 
-These tests verified:
+Collectively, these results demonstrate that the FFT accelerator operates correctly across both simulation and hardware environments. Agreement with the NumPy reference implementation, combined with successful execution on the MiniZed FPGA, verifies the correctness of the RTL design, AXI interface, memory subsystem, and embedded software driver. The completed project represents a full hardware/software co-design workflow, from algorithm implementation and RTL development through FPGA deployment and end-to-end hardware validation.
 
-- Successful AXI communication
-- Correct BRAM read/write functionality
-- Correct FFT computation
-- Successful frequency-domain output generation
-- End-to-end hardware/software integration
+# Key Takeaways
+
+Through this project we gained hands-on experience with:
+
+- FPGA RTL design using SystemVerilog
+- Fixed-point digital signal processing
+- Radix-2 Cooley–Tukey FFT implementation
+- Vivado IP packaging
+- AXI4-Lite peripheral development
+- Hardware/software co-design
+- Zynq-7000 SoC development
+- Embedded software development in Vitis
+- RTL simulation and functional verification
+- FPGA synthesis, implementation, and timing analysis
+- End-to-end hardware validation on a physical FPGA
