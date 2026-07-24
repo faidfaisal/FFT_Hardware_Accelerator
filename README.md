@@ -283,8 +283,6 @@ We would like to express our sincere gratitude to **Professor Peter A. Milder** 
 
 # Authors
 
-This project was developed in the **Department of Electrical and Computer Engineering** at **Stony Brook University**.
-
 ## Faid Faisal
 
 **B.S. Computer Engineering**  
