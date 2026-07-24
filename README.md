@@ -178,6 +178,21 @@ The completed design successfully passed all hardware validation tests executed 
 
 Collectively, these results demonstrate that the FFT accelerator operates correctly across both simulation and hardware environments. Agreement with the NumPy reference implementation, combined with successful execution on the MiniZed FPGA, verifies the correctness of the RTL design, AXI interface, memory subsystem, and embedded software driver. The completed project represents a full hardware/software co-design workflow, from algorithm implementation and RTL development through FPGA deployment and end-to-end hardware validation.
 
+## Hardware Tests
+1. Register Check
+   - Writes value to ADDR before reading it back, confirming BRAM functionality
+2. Memory Test
+   - Writes a ramping value to each address using natural addresses
+   - Reads back every address ensuring they match
+3. Impulse Test
+   - Loads single value A into x[0] in bit reversed order
+   - Counts and prints mismatches with expected FFT
+4. DC Test
+   - Loads all values as A
+   - Counts and prints errors up to 10
+5. Tone Test
+   - Generates input sample by sample using rotating phasor
+   - Passes only if two largest energy bins are bin 16 and bin 1008
 ---
 
 # Repository Structure
@@ -223,6 +238,9 @@ FFT_Hardware_Accelerator/
 │   ├── utilization.png
 │   └── vitis_output.png
 │
+├── SDK/                     #Verification of Hardware Description Language
+|   ├── vitisMain.c
+|
 ├── waveforms/               # Simulation waveform captures
 │
 ├── LICENSE
