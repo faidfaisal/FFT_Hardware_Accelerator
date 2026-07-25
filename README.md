@@ -278,7 +278,6 @@ Stony Brook University
 B.S. Computer Engineering  
 Stony Brook University
 
----
 
 
 
