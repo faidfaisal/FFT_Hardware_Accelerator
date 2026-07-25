@@ -261,19 +261,6 @@ FFT_Hardware_Accelerator/
 The modular organization separates the RTL implementation, verification environment, supporting utilities, and documentation, making the project easier to navigate, maintain, and extend.
 
 ---
-# Future Work
-
-Although the accelerator has been successfully validated on hardware, several enhancements could further improve the design:
-
-- Automatic overflow protection using stage scaling or saturation arithmetic
-- AXI-Stream interface for continuous data streaming
-- DMA-based data transfers between the ARM processor and programmable logic
-- Fully pipelined butterfly architecture for higher throughput
-- Runtime-configurable FFT sizes
-- Performance benchmarking against the AMD/Xilinx FFT IP core
-- Clock frequency optimization and timing improvements
-
----
 
 # Acknowledgements
 
@@ -281,18 +268,14 @@ We would like to express our sincere gratitude to **Professor Peter A. Milder** 
 
 ---
 
-# Authors
+## Authors
 
-## Faid Faisal
+**Faid Faisal**  
+B.S. Computer Engineering  
+Stony Brook University  
 
-**B.S. Computer Engineering**  
-Stony Brook University
-
----
-
-## Paddy Xiang Zheng
-
-**B.S. Computer Engineering**  
+**Paddy Xiang Zheng**  
+B.S. Computer Engineering  
 Stony Brook University
 
 ---
